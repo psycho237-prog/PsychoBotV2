@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pairing Access | Psycho Bot V2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --text: #f9fafb;
+            --text-dim: #9ca3af;
+            --success: #10b981;
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            padding: 2.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #818cf8, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Payment Gate */
+        #payment-section {
+            display: block;
+        }
+
+        .payment-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .crypto-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        /* Pairing UI */
+        #pairing-section {
+            display: none;
+        }
+
+        #code-display {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--input-bg);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            font-size: 1.8rem;
+            letter-spacing: 4px;
+            font-weight: 600;
+            color: var(--secondary);
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #verification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--secondary);
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Psycho Bot V2</h1>
+        <p class="subtitle">Premium Bot Activation</p>
+
+        <!-- Payment Step -->
+        <div id="payment-section">
+            <div class="payment-card">
+                <p style="margin-top:0; font-weight: 600;">License Verification</p>
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('p-card')">Card</button>
+                    <button class="tab-btn" onclick="switchTab('p-crypto')">Crypto</button>
+                </div>
+
+                <div id="p-card" class="tab-content active">
+                    <div class="input-group">
+                        <label>Card Details</label>
+                        <input type="text" placeholder="**** **** **** ****">
+                    </div>
+                </div>
+
+                <div id="p-crypto" class="tab-content">
+                    <label>Wallet Address (USDT)</label>
+                    <div class="crypto-box">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</div>
+                </div>
+            </div>
+            <button class="btn" onclick="startVerification()">Activate Access</button>
+        </div>
+
+        <!-- Pairing Step -->
+        <div id="pairing-section">
+            <div class="input-group" style="text-align: left;">
+                <label>Phone Number </label>
+                <input type="text" id="phoneNumber" placeholder="e.g. 2376xxxxxxxx">
+            </div>
+            <button id="submitBtn" class="btn">Get Pairing Code</button>
+            <div id="loading" style="display:none; margin:1rem 0; color:var(--text-dim)">Generating...</div>
+            <div id="code-display"></div>
+            <p id="instruction" style="display:none; font-size: 0.8rem; margin-top: 1rem; color: var(--text-dim);">
+                Enter this code on your mobile device:<br>
+                Settings > Linked Devices > Link with phone number.
+            </p>
+        </div>
+
+        <a href="/"
+            style="display: block; margin-top: 2rem; color: var(--text-dim); text-decoration: none; font-size: 0.8rem;">←
+            Return Home</a>
+    </div>
+
+    <div id="verification-overlay">
+        <div class="loader"></div>
+        <p id="verify-status" style="margin-top:20px; font-weight: 600;">CHECKING LICENSE...</p>
+    </div>
+
+    <script>
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function startVerification() {
+            const overlay = document.getElementById('verification-overlay');
+            overlay.style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('verify-status').innerText = "LICENSE APPROVED";
+                document.getElementById('verify-status').style.color = "#10b981";
+
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.getElementById('payment-section').style.display = 'none';
+                    document.getElementById('pairing-section').style.display = 'block';
+                }, 1000);
+            }, 3000);
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        const phoneNumber = document.getElementById('phoneNumber');
+        const codeDisplay = document.getElementById('code-display');
+        const instruction = document.getElementById('instruction');
+        const loading = document.getElementById('loading');
+
+        submitBtn.addEventListener('click', async () => {
+            const number = phoneNumber.value.trim();
+            if (!number) return;
+
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            codeDisplay.style.display = 'none';
+            instruction.style.display = 'none';
+
+            try {
+                const response = await fetch(`/code?number=${number}`);
+                const data = await response.json();
+                if (data.code) {
+                    codeDisplay.innerText = data.code;
+                    codeDisplay.style.display = 'block';
+                    instruction.style.display = 'block';
+                }
+            } catch (err) {
+                alert('Connection error');
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
