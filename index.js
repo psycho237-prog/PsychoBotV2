@@ -301,6 +301,78 @@ app.get('/pair', async (req, res) => {
     res.sendFile(__path + '/pair.html');
 });
 
+// --- ADMIN CONFIGURATION ---
+const ADMIN_PASSWORD = "psycho2024admin";
+
+// --- ADMIN DASHBOARD (Master Link Page) ---
+app.get('/admin-dashboard', (req, res) => {
+    const { pass } = req.query;
+    if (pass !== ADMIN_PASSWORD) {
+        return res.status(403).send(`<html><body style="background:#1a1a2e;color:#ff6b6b;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><h1>❌ Accès Refusé</h1></body></html>`);
+    }
+
+    res.send(`<!DOCTYPE html><html><head><title>🔐 Admin Panel - PsychoBotV2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff;padding:20px}
+    .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border-radius:20px;padding:40px;text-align:center;max-width:500px;width:100%;border:1px solid rgba(255,255,255,0.1)}
+    h1{font-size:1.8rem;margin-bottom:20px;background:linear-gradient(90deg,#00f5a0,#00d9f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    p{color:#aaa;margin-bottom:20px;font-size:0.95rem}
+    input{width:100%;padding:15px;border-radius:10px;border:none;margin:10px 0;font-size:1rem;background:#1a1a2e;color:#fff}
+    input::placeholder{color:#666}
+    .btn{width:100%;padding:15px;background:linear-gradient(90deg,#00f5a0,#00d9f5);border:none;border-radius:30px;color:#000;font-weight:bold;font-size:1.1rem;cursor:pointer;margin-top:15px;transition:transform 0.3s}
+    .btn:hover{transform:scale(1.02)}
+    .footer{margin-top:25px;font-size:0.8rem;color:#555}
+    </style></head>
+    <body><div class="card">
+    <h1>🔐 Admin Panel</h1>
+    <p>Collez l'URL du client pour activer son bot après paiement MoMo.</p>
+    <form action="/admin-unlock-action" method="POST">
+        <input type="hidden" name="pass" value="${pass}">
+        <input type="text" name="url" placeholder="Ex: client-bot.onrender.com" required>
+        <button type="submit" class="btn">🔓 DÉBLOQUER MAINTENANT</button>
+    </form>
+    <div class="footer">PsychoBotV2 Admin Panel • Secure</div>
+    </div></body></html>`);
+});
+
+// --- ADMIN UNLOCK ACTION ---
+app.post('/admin-unlock-action', async (req, res) => {
+    const { url, pass } = req.body;
+    if (pass !== ADMIN_PASSWORD) return res.send("❌ Mot de passe incorrect.");
+    if (!url) return res.send("❌ URL manquante.");
+
+    const firebaseKey = url.replace('https://', '').replace('http://', '').split('/')[0].replace(/\./g, '_');
+
+    try {
+        await db.ref('payments/' + firebaseKey).set({
+            paid: true,
+            method: 'momo_admin',
+            activatedAt: Date.now()
+        });
+
+        res.send(`<!DOCTYPE html><html><head><title>✅ Activé</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff;padding:20px;margin:0}
+        .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border-radius:20px;padding:40px;text-align:center;max-width:450px;border:1px solid rgba(255,255,255,0.1)}
+        h1{color:#00f5a0;font-size:2rem;margin-bottom:15px}
+        p{color:#ccc;margin:10px 0}
+        a{color:#00f5a0;text-decoration:none;display:inline-block;margin-top:20px;padding:12px 30px;border:1px solid #00f5a0;border-radius:25px}
+        a:hover{background:#00f5a0;color:#000}
+        </style></head>
+        <body><div class="card">
+        <h1>✅ ACTIVÉ !</h1>
+        <p>Le bot <strong>${url}</strong> est maintenant débloqué.</p>
+        <p style="font-size:0.9rem;color:#888">Dis au client de rafraîchir sa page pour voir le QR Code.</p>
+        <a href="/admin-dashboard?pass=${pass}">← Retour au Panel</a>
+        </div></body></html>`);
+    } catch (err) {
+        res.send("❌ Erreur Firebase: " + err.message);
+    }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => res.status(200).send('OK'));
 app.get('/ping', (req, res) => res.status(200).json({
