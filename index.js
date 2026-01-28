@@ -302,7 +302,7 @@ app.get('/pair', async (req, res) => {
 });
 
 // --- ADMIN CONFIGURATION ---
-const ADMIN_PASSWORD = "psycho2024admin";
+const ADMIN_PASSWORD = "psychoisadev";
 
 // --- ADMIN DASHBOARD (Master Link Page) ---
 app.get('/admin-dashboard', (req, res) => {
